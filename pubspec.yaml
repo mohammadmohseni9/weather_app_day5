@@ -30,6 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  google_fonts:
+  flutter_svg:
+  intl:
+  liquid_progress_indicator_v2:
 
 
   # The following adds the Cupertino Icons font to your application.
