@@ -1,8 +1,6 @@
 # weather_app_day5
 
-A new Flutter project.
-
-## Getting Started
+Creating a weather program and displaying information from the openweathermap server## Getting Started
 
 This project is a starting point for a Flutter application.
 
