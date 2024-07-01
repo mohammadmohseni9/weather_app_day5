@@ -1,7 +1,26 @@
+import 'dart:async';
+import 'dart:ui';
+import 'package:weather_app_day5/widget/get_day_time_based_on_time_ranges.dart';
+
+import '../Widget/body_weather.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../models/dataModel.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+class AppScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+      };
 }
 
 class MyApp extends StatelessWidget {
@@ -11,115 +30,224 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: AppScrollBehavior(),
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        fontFamily: GoogleFonts.lato().fontFamily,
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: HomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class HomePage extends StatefulWidget {
+  HomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomePageState extends State<HomePage> {
+  TextEditingController _NameController = TextEditingController();
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  late Future<DataModels> _getData;
+  //late Future<DataModels> CurrentDataForweather;
+
+  //List<String> cities = ['tehran', 'shiraz', 'London'];
+
+  var CityName = 'tehran';
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    //for (int i = 0; i <= cities.length; i++) {
+    _getData = sendReqApiweather(CityName);
+    // }
+    //print(_getData);
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        backgroundColor: Colors.transparent,
+        title: const Text(''),
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () {},
+          padding: EdgeInsets.only(top: 20),
+          icon: const Icon(Icons.search),
+          iconSize: 30,
+          color: Colors.white,
         ),
+        actions: [
+          Container(
+            margin: EdgeInsets.only(right: 10, top: 20),
+            child: GestureDetector(
+              onTap: () => print("cliked menu!"),
+              child: SvgPicture.asset(
+                "assets/icons/menu.svg",
+                height: 40,
+                width: 40,
+                color: Colors.white,
+              ),
+            ),
+          )
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: StreamBuilder<DataModels>(
+        stream: _getData.asStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            DataModels? data = snapshot.data;
+
+            return Stack(
+              children: [
+                ImageFiltered(
+                    imageFilter: ImageFilter.blur(),
+                    child: bodyImage(nowTime, screenHeight, screenWidth)),
+                Container(
+                  decoration: const BoxDecoration(color: Colors.black26),
+                ),
+                // Container(
+                //   margin: EdgeInsets.only(
+                //     top: screenHeight * 0.1,
+                //     left: screenWidth * 0.03,
+                //   ),
+                //   child: Row(
+                //     children: [
+                //       Container(
+                //         margin: EdgeInsets.symmetric(
+                //             horizontal: screenWidth * 0.005),
+                //         width: 25,
+                //         height: 10,
+                //         decoration: BoxDecoration(
+                //             color: Colors.white54,
+                //             borderRadius: BorderRadius.circular(5)),
+                //       ),
+                //       Container(
+                //         margin: EdgeInsets.symmetric(
+                //             horizontal: screenWidth * 0.002),
+                //         width: 7,
+                //         height: 7,
+                //         decoration: BoxDecoration(
+                //             color: Colors.white54,
+                //             borderRadius: BorderRadius.circular(5)),
+                //       ),
+                //       Container(
+                //         margin: EdgeInsets.symmetric(
+                //             horizontal: screenWidth * 0.002),
+                //         width: 7,
+                //         height: 7,
+                //         decoration: BoxDecoration(
+                //             color: Colors.white54,
+                //             borderRadius: BorderRadius.circular(5)),
+                //       ),
+                //       Container(
+                //         margin: EdgeInsets.symmetric(
+                //             horizontal: screenWidth * 0.002),
+                //         width: 7,
+                //         height: 7,
+                //         decoration: BoxDecoration(
+                //             color: Colors.white54,
+                //             borderRadius: BorderRadius.circular(5)),
+                //       ),
+                //     ],
+                //   ),
+                //),
+                PageView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 1,
+                  itemBuilder: (context, i) {
+                    return CenterBody(
+                      dataModels: data,
+                      index: i,
+                    );
+                  },
+                ),
+              ],
+            );
+          } else {
+            return Center(
+                child: Container(
+              width: 70,
+              height: 70,
+              child: LiquidCircularProgressIndicator(
+                value: 0.45, // Defaults to 0.5.
+                valueColor: AlwaysStoppedAnimation(Colors
+                    .pink), // Defaults to the current Theme's accentColor.
+                backgroundColor: Colors
+                    .white, // Defaults to the current Theme's backgroundColor.
+                borderColor: Colors.red,
+                borderWidth: 6.0,
+              ),
+            ));
+          }
+        },
+      ),
     );
+  }
+
+  Image bodyImage(String time, double height, double width) {
+    String n = getDayTimeBasedOnTimeRanges(time);
+    if (n == "Morning" || n == "noonday" || n == "AfterNoon") {
+      return Image.asset(
+        "assets/images/teh-day.jpg",
+        fit: BoxFit.cover,
+        height: height,
+        width: width,
+      );
+    } else if (n == "night") {
+      return Image.asset(
+        "assets/images/tehran.jpg",
+        fit: BoxFit.cover,
+        height: height,
+        width: width,
+      );
+    } else {
+      return Image.asset(
+        "assets/images/teh-day.jpg",
+        fit: BoxFit.cover,
+        height: height,
+        width: width,
+      );
+    }
+  }
+
+  Future<DataModels> sendReqApiweather(String cityName) async {
+    var clientId = 'bca6f8aac3de0b4757979a5bd55a5818';
+
+    var response = await Dio().get(
+        'https://api.openweathermap.org/data/2.5/weather',
+        queryParameters: {'q': cityName, 'appid': clientId, 'units': 'metric'});
+
+    //print(response.statusCode);
+    print(response.data);
+
+    var dataModel = DataModels(
+        response.data['name'],
+        response.data['coord']['lat'],
+        response.data['weather'][0]['description'],
+        response.data['coord']['lon'],
+        response.data['weather'][0]['main'],
+        response.data['pressure'],
+        response.data['main']['temp'],
+        response.data['main']['temp_max'],
+        response.data['main']['temp_min'],
+        response.data['country'],
+        response.data['timezone'],
+        response.data['main']['humidity'],
+        response.data['sys']['sunrise'],
+        response.data['sys']['sunset'],
+        response.data['wind']['speed']);
+    return dataModel;
   }
 }

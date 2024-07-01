@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
+import 'get_day_time_based_on_time_ranges.dart';
+
 String date = DateFormat("y MMMM d " + 'HH:mm a').format(DateTime.now());
 String nowTime = DateTime.now().toString();
 
@@ -129,7 +131,7 @@ class CenterBody extends StatelessWidget {
                           width: screenWidth * 0.02,
                         ),
                         Text(
-                          NightOrDayString(nowTime),
+                          getDayTimeBasedOnTimeRanges(nowTime),
                           style: GoogleFonts.lato(
                             textStyle: const TextStyle(
                                 fontSize: 25, color: Colors.white),
@@ -196,26 +198,23 @@ class CenterBody extends StatelessWidget {
   }
 }
 
-String NightOrDayString(String nowTime) {
-  final now = DateTime.parse(nowTime);
-  final hour = now.hour;
-  if (hour >= 6 && hour < 12) {
-    return 'Day';
-  } else if (hour >= 12 && hour < 16) {
-    return 'AfterNoon';
-  } else if (hour >= 17 || hour < 6) {
-    return 'Night';
-  } else {
-    return 'error';
-  }
-}
+
+
+
 
 SvgPicture addressIconSvg() {
-  String t = NightOrDayString(nowTime);
+  String t = getDayTimeBasedOnTimeRanges(nowTime);
 
-  if (t == "Day") {
+  if (t == "Night") {
     return SvgPicture.asset(
       "assets/icons/moon.svg",
+      color: Colors.white,
+      width: 45,
+      height: 45,
+    );
+  } else if (t == "AfterNoon" || t == "noonday") {
+    return SvgPicture.asset(
+      "assets/icons/sun.svg",
       color: Colors.white,
       width: 45,
       height: 45,
